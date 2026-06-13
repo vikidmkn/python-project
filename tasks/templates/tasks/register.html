@@ -1,0 +1,35 @@
+{% extends 'tasks/base.html' %}
+{% block title %}Register — Forge{% endblock %}
+{% block auth_content %}
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="auth-left-logo">FORGE</div>
+    <div>
+      <div class="auth-left-title">Start forging.</div>
+      <div class="auth-left-sub">Create your account and take control of your tasks.</div>
+    </div>
+    <div></div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+      <div class="auth-form-title">Create account.</div>
+      <form method="post" style="display:flex;flex-direction:column;gap:16px">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+          <label class="form-label">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<div class="help-text">{{ field.help_text }}</div>{% endif %}
+          {% if field.errors %}<ul class="error-list">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        {% endfor %}
+        {% if form.non_field_errors %}
+        <div style="color:#e11d48;font-size:.82rem;padding:10px 14px;border:1px solid #e11d48;">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary" style="border-radius:0;padding:12px 20px;justify-content:center">Create Account →</button>
+      </form>
+      <div class="auth-footer">Already have an account? <a href="{% url 'login' %}">Sign in</a></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
