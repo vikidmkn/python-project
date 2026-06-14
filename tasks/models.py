@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Case, When, IntegerField
+
 
 class Task(models.Model):
     PRIORITY_CHOICES = [
@@ -21,6 +23,14 @@ class Task(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
 
+    PRIORITY_ORDER = Case(
+        When(priority='high', then=0),
+        When(priority='medium', then=1),
+        When(priority='low', then=2),
+        default=99,
+        output_field=IntegerField(),
+    )
+
     class Meta:
         ordering = ['-created_at']
         verbose_name = 'Task'
@@ -28,10 +38,8 @@ class Task(models.Model):
 
     def __str__(self):
         return self.title
-    
+
     @property
     def is_overdue(self):
         from django.utils import timezone
         return self.deadline < timezone.now() and self.status == 'pending'
-
-    

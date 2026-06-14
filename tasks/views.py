@@ -3,7 +3,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from django.db.models import Q
+from django.db.models import Q, Case, When, IntegerField
 from .models import Task
 from .forms import RegisterForm, LoginForm, TaskForm
 
@@ -59,18 +59,26 @@ def dashboard(request):
     if priority_filter:
         tasks = tasks.filter(priority=priority_filter)
 
+    priority_order = Case(
+        When(priority='high', then=0),
+        When(priority='medium', then=1),
+        When(priority='low', then=2),
+        default=99,
+        output_field=IntegerField(),
+    )
+
     sort_by = request.GET.get('sort', '-created_at')
     sort_map = {
-        'deadline': 'deadline',
-        '-deadline': '-deadline',
-        'priority': 'priority',
-        '-priority': '-priority',
-        'created_at': 'created_at',
-        '-created_at': '-created_at',
-        'overdue': 'deadline',
+        'deadline': ('deadline',),
+        '-deadline': ('-deadline',),
+        'priority': (priority_order,),
+        '-priority': (priority_order.desc(),),
+        'created_at': ('created_at',),
+        '-created_at': ('-created_at',),
+        'overdue': ('deadline',),
     }
 
-    tasks = tasks.order_by(sort_map.get(sort_by, '-created_at'))
+    tasks = tasks.order_by(*sort_map.get(sort_by, ('-created_at',)))
 
     all_tasks = Task.objects.filter(user=request.user)
     total = all_tasks.count()
