@@ -28,7 +28,8 @@ class Task(models.Model):
 
     def __str__(self):
         return self.title
-
+    
+    @property
     def is_overdue(self):
         from django.utils import timezone
         return self.deadline < timezone.now() and self.status == 'pending'
