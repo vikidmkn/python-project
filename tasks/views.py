@@ -60,6 +60,7 @@ def dashboard(request):
         'deadline': 'deadline', '-deadline': '-deadline',
         'priority': 'priority', '-priority': '-priority',
         'created_at': 'created_at', '-created_at': '-created_at',
+        'overdue': 'deadline',
     }
     tasks = tasks.order_by(sort_map.get(sort_by, '-created_at'))
     all_tasks = Task.objects.filter(user=request.user)
