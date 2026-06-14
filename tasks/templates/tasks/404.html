@@ -1,0 +1,15 @@
+{% extends 'tasks/base.html' %}
+{% block title %}Page Not Found — FORGE{% endblock %}
+{% block content %}
+<div class="hero-strip">
+  <div class="hero-eyebrow">Error 404</div>
+  <div class="hero-title">Lost?</div>
+  <div class="hero-sub">This page doesn't exist.</div>
+</div>
+<div class="empty-state">
+  <div class="empty-icon">🔍</div>
+  <div class="empty-title">Page not found.</div>
+  <div class="empty-desc">The page you're looking for doesn't exist or was moved.</div>
+  <a href="{% url 'dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+</div>
+{% endblock %}
