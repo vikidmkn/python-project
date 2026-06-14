@@ -1,18 +1,17 @@
 {% extends 'tasks/base.html' %}
-{% block title %}Dashboard — Forge{% endblock %}
+{% block title %}Dashboard — FORGE{% endblock %}
 {% block content %}
 
-<!-- POMODORO BAR -->
 <div class="pomo-bar" id="pomoBar">
   <div>
     <div class="pomo-time" id="pomoTime">25:00</div>
-    <div style="display:flex;gap:6px;margin-top:6px">
-      <input type="number" id="pomoDuration" value="25" min="1" max="99" style="width:48px;padding:3px 6px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:700;text-align:center;" title="Set minutes">
-      <span style="font-size:0.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);align-self:center">min</span>
+    <div class="pomo-dur-row">
+      <input type="number" id="pomoDuration" class="pomo-dur-input" value="25" min="1" max="99">
+      <span class="pomo-dur-lbl">min</span>
     </div>
   </div>
-  <div class="pomo-divider"></div>
-  <div class="pomo-info">
+  <div class="pomo-sep"></div>
+  <div>
     <div class="pomo-label">Focus session</div>
     <div class="pomo-task-name" id="pomoTaskName">Select a task to start</div>
     <div class="pomo-dots">
@@ -24,57 +23,54 @@
   </div>
   <div class="pomo-controls">
     <button type="button" class="pomo-btn primary" id="pomoStartBtn" onclick="togglePomo()">▶ Start</button>
-    <button type="button" class="pomo-btn" onclick="resetPomo()">↺ Reset</button>
+    <button type="button" class="pomo-btn ghost" onclick="resetPomo()">↺ Reset</button>
   </div>
 </div>
 
-<!-- HERO -->
 <div class="hero-strip">
-  <div class="hero-tag">Your workspace</div>
-  <div class="hero-title">The Work.<span> Get it done.</span></div>
-  <div class="hero-sub">Welcome back, {{ user.username }}.</div>
+  <div class="hero-eyebrow">Your workspace · {{ user.username }}</div>
+  <div class="hero-title">The Work. Get it done.</div>
+  <div class="hero-sub">{{ total }} tasks total · {{ completed }} completed · {{ pending }} pending</div>
 </div>
 
-<!-- STATS -->
 <div class="stats-row">
   <div class="stat-cell">
-    <div class="stat-num">{{ total }}</div>
-    <div class="stat-sub-label">Total</div>
+    <div class="stat-num cn-peri" id="statTotal">{{ total }}</div>
+    <div class="stat-sub-lbl">Total</div>
   </div>
   <div class="stat-cell">
-    <div class="stat-num c-pink">{{ completed }}</div>
-    <div class="stat-sub-label">Completed</div>
-    <div class="progress-wrap"><div class="progress-fill" style="width:{{ completion_pct }}%"></div></div>
+    <div class="stat-num cn-cant" id="statCompleted">{{ completed }}</div>
+    <div class="stat-sub-lbl">Completed</div>
+    <div class="prog-wrap"><div class="prog-fill" id="mainProg" style="width:{{ completion_pct }}%"></div></div>
   </div>
   <div class="stat-cell">
-    <div class="stat-num">{{ pending }}</div>
-    <div class="stat-sub-label">Pending</div>
+    <div class="stat-num cn-dark" id="statPending">{{ pending }}</div>
+    <div class="stat-sub-lbl">Pending</div>
   </div>
   <div class="stat-cell">
-    <div class="stat-num c-red">{{ overdue }}</div>
-    <div class="stat-sub-label">Overdue</div>
+    <div class="stat-num cn-wm" id="statOverdue">{{ overdue }}</div>
+    <div class="stat-sub-lbl">Overdue</div>
   </div>
 </div>
 
-<!-- TOOLBAR -->
 <form method="get" id="filterForm">
   <div class="toolbar-row">
     <div class="search-wrap">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <svg class="search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
       <input type="text" name="q" value="{{ query }}" placeholder="Search tasks..." class="search-input" oninput="debounceSubmit()">
     </div>
-    <select name="status" class="filter-sel" onchange="this.form.submit()">
+    <select name="status" class="fsel" onchange="this.form.submit()">
       <option value="">All Status</option>
       <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
       <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
     </select>
-    <select name="priority" class="filter-sel" onchange="this.form.submit()">
+    <select name="priority" class="fsel" onchange="this.form.submit()">
       <option value="">All Priority</option>
       <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
       <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
       <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
     </select>
-    <select name="sort" class="filter-sel" onchange="this.form.submit()">
+    <select name="sort" class="fsel" onchange="this.form.submit()">
       <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest</option>
       <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Oldest</option>
       <option value="deadline" {% if sort_by == 'deadline' %}selected{% endif %}>Deadline ↑</option>
@@ -87,40 +83,45 @@
   </div>
 </form>
 
-<!-- VIEW TABS — outside form so they don't submit -->
 <div class="toolbar-row" style="padding-top:10px;padding-bottom:10px;border-bottom:1px solid var(--border)">
-  <div class="view-tabs">
-    <button type="button" class="view-tab active" id="tabGrid" onclick="switchView('grid')">Grid</button>
-    <button type="button" class="view-tab" id="tabWeek" onclick="switchView('week')">Week</button>
+  <div class="vtabs">
+    <button type="button" class="vtab active" id="tabGrid" onclick="switchView('grid')">Grid</button>
+    <button type="button" class="vtab" id="tabWeek" onclick="switchView('week')">Week</button>
   </div>
   <a href="{% url 'task_create' %}" class="btn btn-primary" style="margin-left:auto">+ New Task</a>
 </div>
 
-<!-- GRID VIEW -->
 <div id="viewGrid">
 {% if tasks %}
-<div class="section-head">
-  <div class="section-tag">Your tasks</div>
-  <div class="section-title">Get it done.</div>
+<div class="section-head" style="padding-bottom:16px">
+  <div>
+    <div class="section-eyebrow">Your tasks</div>
+    <div class="section-title">Get it done.</div>
+  </div>
+  <div style="font-size:0.78rem;color:var(--text-muted);font-weight:600">{{ tasks|length }} showing</div>
 </div>
 <div class="tasks-grid">
   {% for task in tasks %}
-  <div class="task-card priority-{{ task.priority }} {% if task.status == 'completed' %}completed{% endif %} {% if task.is_overdue %}overdue{% endif %}">
+  <div class="task-card {% if task.priority == 'high' %}ph{% elif task.priority == 'medium' %}pm{% else %}pl{% endif %} {% if task.status == 'completed' %}completed{% endif %} {% if task.is_overdue %}overdue{% endif %}" id="card-{{ task.pk }}">
     <div class="task-card-top">
-      <div class="task-title">{{ task.title }}</div>
-      <span class="badge badge-{{ task.priority }}">
-        {% if task.priority == 'high' %}High{% elif task.priority == 'medium' %}Med{% else %}Low{% endif %}
-      </span>
+      <div class="task-title" id="title-{{ task.pk }}">{{ task.title }}</div>
     </div>
-    {% if task.description %}
-    <div class="task-desc">{{ task.description|truncatewords:12 }}</div>
-    {% endif %}
+    <div class="stickers" id="stickers-{{ task.pk }}">
+      {% if task.priority == 'high' %}<span class="sticker sticker-high">🔥 High</span>
+      {% elif task.priority == 'medium' %}<span class="sticker sticker-medium">⚡ Medium</span>
+      {% else %}<span class="sticker sticker-low">🌿 Low</span>{% endif %}
+      {% if task.is_overdue %}<span class="status-badge sb-overdue">⚠️ Overdue</span>
+      {% elif task.status == 'completed' %}<span class="status-badge sb-done" id="sbadge-{{ task.pk }}">✓ Done</span>
+      {% else %}<span class="status-badge sb-pending" id="sbadge-{{ task.pk }}">● Pending</span>{% endif %}
+    </div>
+    {% if task.description %}<div class="task-desc">{{ task.description|truncatewords:14 }}</div>{% endif %}
     <div class="task-meta">
-      {% if task.is_overdue %}<span class="overdue-tag">Overdue · {{ task.deadline|date:"M d" }}</span>
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      {% if task.is_overdue %}<span class="overdue-lbl">Overdue · {{ task.deadline|date:"M d" }}</span>
       {% else %}{{ task.deadline|date:"M d, H:i" }}{% endif %}
     </div>
     <div class="task-actions">
-      <button type="button" class="toggle-btn {{ task.status }}" data-url="{% url 'task_toggle' task.pk %}" onclick="toggleTask(this)">
+      <button type="button" class="toggle-btn {{ task.status }}" data-url="{% url 'task_toggle' task.pk %}" data-pk="{{ task.pk }}" onclick="toggleTask(this)">
         {% if task.status == 'pending' %}Mark done →{% else %}✓ Done{% endif %}
       </button>
       <div class="icon-actions">
@@ -130,7 +131,9 @@
         <a href="{% url 'task_delete' task.pk %}" class="icon-btn" title="Delete">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         </a>
-        <button type="button" class="icon-btn" title="Focus on this task" onclick="focusTask('{{ task.title|escapejs }}')" style="font-size:0.65rem">▶</button>
+        <button type="button" class="icon-btn" title="Focus" onclick="focusTask('{{ task.title|escapejs }}')">
+          <svg width="10" height="11" fill="currentColor" viewBox="0 0 10 11"><polygon points="0,0 10,5.5 0,11"/></svg>
+        </button>
       </div>
     </div>
   </div>
@@ -138,12 +141,9 @@
 </div>
 {% else %}
 <div class="empty-state">
-  <div class="empty-icon">⚒</div>
+  <div class="empty-icon">⚒️</div>
   <div class="empty-title">No tasks found.</div>
-  <div class="empty-desc">
-    {% if query or status_filter or priority_filter %}Try adjusting your filters.
-    {% else %}Start forging. Create your first task.{% endif %}
-  </div>
+  <div class="empty-desc">{% if query or status_filter or priority_filter %}Try adjusting your filters.{% else %}Start forging. Create your first task.{% endif %}</div>
   {% if not query and not status_filter and not priority_filter %}
   <a href="{% url 'task_create' %}" class="btn btn-primary">+ Create Task</a>
   {% endif %}
@@ -151,138 +151,110 @@
 {% endif %}
 </div>
 
-<!-- WEEK VIEW -->
 <div id="viewWeek" style="display:none">
-  <div class="section-head" style="padding-bottom:16px">
-    <div class="section-tag">This week</div>
-    <div class="section-title">Weekly view.</div>
+  <div class="week-nav">
+    <button type="button" class="week-nav-btn" onclick="changeWeek(-1)">← Prev</button>
+    <span class="week-nav-label" id="weekLabel"></span>
+    <button type="button" class="week-nav-btn" onclick="changeWeek(1)">Next →</button>
+    <button type="button" class="week-nav-btn" onclick="goToday()" style="margin-left:auto">Today</button>
   </div>
-  <div class="week-view">
-    <div class="week-header" id="weekHeader"></div>
-    <div class="week-body" id="weekBody"></div>
-  </div>
+  <div class="week-header" id="weekHeader"></div>
+  <div class="week-body" id="weekBody"></div>
 </div>
 
 {% endblock %}
-
 {% block extra_js %}
 <script>
-const taskData = [
+const allTasks = [
   {% for task in tasks %}
-  { title: "{{ task.title|escapejs }}", priority: "{{ task.priority }}", deadline: "{{ task.deadline|date:'Y-m-d' }}", status: "{{ task.status }}" },
+  { title:"{{ task.title|escapejs }}", priority:"{{ task.priority }}", deadline:"{{ task.deadline|date:'Y-m-d' }}", status:"{{ task.status }}" },
   {% endfor %}
 ];
+let nTotal={{ total }}, nCompleted={{ completed }}, nPending={{ pending }};
+
+function refreshStats() {
+  const pct = nTotal > 0 ? Math.round(nCompleted/nTotal*100) : 0;
+  document.getElementById('statTotal').textContent = nTotal;
+  document.getElementById('statCompleted').textContent = nCompleted;
+  document.getElementById('statPending').textContent = nPending;
+  document.getElementById('mainProg').style.width = pct + '%';
+}
 
 function toggleTask(btn) {
-  fetch(btn.dataset.url, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } })
+  const pk = btn.dataset.pk;
+  fetch(btn.dataset.url, { method:'POST', headers:{'X-CSRFToken':'{{ csrf_token }}'} })
   .then(r => r.json()).then(data => {
-    const card = btn.closest('.task-card');
+    const card = document.getElementById(`card-${pk}`);
+    const titleEl = document.getElementById(`title-${pk}`);
+    const badge = document.getElementById(`sbadge-${pk}`);
     if (data.status === 'completed') {
       btn.className = 'toggle-btn completed'; btn.textContent = '✓ Done';
-      card.classList.add('completed'); card.querySelector('.task-title').style.textDecoration = 'line-through';
+      card.classList.add('completed'); titleEl.style.textDecoration = 'line-through';
+      nCompleted++; nPending--;
+      if (badge) { badge.className = 'status-badge sb-done'; badge.textContent = '✓ Done'; }
     } else {
       btn.className = 'toggle-btn pending'; btn.textContent = 'Mark done →';
-      card.classList.remove('completed'); card.querySelector('.task-title').style.textDecoration = '';
+      card.classList.remove('completed'); titleEl.style.textDecoration = '';
+      nCompleted--; nPending++;
+      if (badge) { badge.className = 'status-badge sb-pending'; badge.textContent = '● Pending'; }
     }
+    refreshStats();
   });
 }
 
-let searchTimer;
-function debounceSubmit() { clearTimeout(searchTimer); searchTimer = setTimeout(() => document.getElementById('filterForm').submit(), 400); }
+let st;
+function debounceSubmit() { clearTimeout(st); st = setTimeout(() => document.getElementById('filterForm').submit(), 400); }
 
 function switchView(v) {
-  document.getElementById('viewGrid').style.display = v === 'grid' ? '' : 'none';
-  document.getElementById('viewWeek').style.display = v === 'week' ? '' : 'none';
-  document.getElementById('tabGrid').classList.toggle('active', v === 'grid');
-  document.getElementById('tabWeek').classList.toggle('active', v === 'week');
-  if (v === 'week') buildWeek();
+  document.getElementById('viewGrid').style.display = v==='grid'?'':'none';
+  document.getElementById('viewWeek').style.display = v==='week'?'':'none';
+  document.getElementById('tabGrid').classList.toggle('active', v==='grid');
+  document.getElementById('tabWeek').classList.toggle('active', v==='week');
+  if (v==='week') buildWeek();
 }
 
-function buildWeek() {
-  const now = new Date();
-  const monday = new Date(now);
-  const day = now.getDay();
-  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
-  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  let hdr = '', body = '';
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday); d.setDate(monday.getDate() + i);
-    const isToday = d.toDateString() === now.toDateString();
-    hdr += `<div class="week-day-col ${isToday ? 'today' : ''}">
-      <div class="week-day-name">${days[i]}</div>
-      <div class="week-day-num">${d.getDate()}</div>
-    </div>`;
-    const dateStr = d.toISOString().slice(0,10);
-    const dayTasks = taskData.filter(t => t.deadline === dateStr && t.status !== 'completed');
-    body += `<div class="week-col">${dayTasks.map(t => `<div class="week-task-pill ${t.priority}" title="${t.title}">${t.title}</div>`).join('')}</div>`;
+let wkOff=0;
+function getMon(off) {
+  const n=new Date(); n.setDate(n.getDate()+off*7);
+  const d=n.getDay(), m=new Date(n);
+  m.setDate(n.getDate()-(d===0?6:d-1)); m.setHours(0,0,0,0); return m;
+}
+function changeWeek(d){wkOff+=d;buildWeek();}
+function goToday(){wkOff=0;buildWeek();}
+function buildWeek(){
+  const mon=getMon(wkOff);
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const sun=new Date(mon); sun.setDate(mon.getDate()+6);
+  document.getElementById('weekLabel').textContent=`${mo[mon.getMonth()]} ${mon.getDate()} – ${mo[sun.getMonth()]} ${sun.getDate()}, ${sun.getFullYear()}`;
+  const now=new Date(); now.setHours(0,0,0,0);
+  let h='',b='';
+  for(let i=0;i<7;i++){
+    const d=new Date(mon); d.setDate(mon.getDate()+i);
+    const today=d.getTime()===now.getTime();
+    h+=`<div class="week-day-col${today?' today':''}"><div class="week-day-name">${days[i]}</div><div class="week-day-num">${d.getDate()}</div></div>`;
+    const ds=d.toISOString().slice(0,10);
+    const ts=allTasks.filter(t=>t.deadline===ds&&t.status!=='completed');
+    b+=`<div class="week-col">${ts.map(t=>`<div class="week-pill ${t.priority}" title="${t.title}">${t.title}</div>`).join('')}</div>`;
   }
-  document.getElementById('weekHeader').innerHTML = hdr;
-  document.getElementById('weekBody').innerHTML = body;
+  document.getElementById('weekHeader').innerHTML=h;
+  document.getElementById('weekBody').innerHTML=b;
 }
 
-/* POMODORO */
-let pomoSeconds = 25 * 60;
-let pomoRunning = false;
-let pomoInterval = null;
-let pomoSession = 1;
-
-document.getElementById('pomoDuration').addEventListener('change', function() {
-  if (!pomoRunning) {
-    const mins = parseInt(this.value) || 25;
-    pomoSeconds = mins * 60;
-    updatePomoDisplay();
-  }
-});
-
-function updatePomoDisplay() {
-  const m = Math.floor(pomoSeconds / 60).toString().padStart(2,'0');
-  const s = (pomoSeconds % 60).toString().padStart(2,'0');
-  document.getElementById('pomoTime').textContent = `${m}:${s}`;
+let ps=25*60,pr=false,pi=null,pSess=1;
+document.getElementById('pomoDuration').addEventListener('change',function(){if(!pr){ps=(parseInt(this.value)||25)*60;updP();}});
+function updP(){const m=Math.floor(ps/60).toString().padStart(2,'0'),s=(ps%60).toString().padStart(2,'0');document.getElementById('pomoTime').textContent=`${m}:${s}`;}
+function togglePomo(){
+  const btn=document.getElementById('pomoStartBtn');
+  if(pr){clearInterval(pi);pr=false;btn.textContent='▶ Start';}
+  else{pr=true;btn.textContent='⏸ Pause';pi=setInterval(()=>{ps--;updP();if(ps<=0){clearInterval(pi);pr=false;btn.textContent='▶ Start';pSess=Math.min(pSess+1,4);for(let i=1;i<=4;i++){const d=document.getElementById(`pd${i}`);if(d)d.className=i<=pSess?'pomo-dot':'pomo-dot empty';}ps=5*60;updP();document.getElementById('pomoTaskName').textContent='☕ Break — 5 min';}},1000);}
 }
-
-function togglePomo() {
-  const btn = document.getElementById('pomoStartBtn');
-  if (pomoRunning) {
-    clearInterval(pomoInterval); pomoRunning = false; btn.textContent = '▶ Start';
-  } else {
-    pomoRunning = true; btn.textContent = '⏸ Pause';
-    pomoInterval = setInterval(() => {
-      pomoSeconds--;
-      updatePomoDisplay();
-      if (pomoSeconds <= 0) {
-        clearInterval(pomoInterval); pomoRunning = false;
-        btn.textContent = '▶ Start';
-        pomoSession = Math.min(pomoSession + 1, 4);
-        for (let i = 1; i <= 4; i++) {
-          const dot = document.getElementById(`pd${i}`);
-          if (dot) dot.className = i <= pomoSession ? 'pomo-dot' : 'pomo-dot empty';
-        }
-        pomoSeconds = 5 * 60;
-        updatePomoDisplay();
-        document.getElementById('pomoTaskName').textContent = 'Break time! Rest for 5 min.';
-      }
-    }, 1000);
-  }
+function resetPomo(){
+  clearInterval(pi);pr=false;ps=(parseInt(document.getElementById('pomoDuration').value)||25)*60;pSess=1;updP();
+  document.getElementById('pomoStartBtn').textContent='▶ Start';
+  document.getElementById('pomoTaskName').textContent='Select a task to start';
+  for(let i=1;i<=4;i++){const d=document.getElementById(`pd${i}`);if(d)d.className=i===1?'pomo-dot':'pomo-dot empty';}
 }
-
-function resetPomo() {
-  clearInterval(pomoInterval); pomoRunning = false;
-  const mins = parseInt(document.getElementById('pomoDuration').value) || 25;
-  pomoSeconds = mins * 60;
-  pomoSession = 1;
-  updatePomoDisplay();
-  document.getElementById('pomoStartBtn').textContent = '▶ Start';
-  document.getElementById('pomoTaskName').textContent = 'Select a task to start';
-  for (let i = 1; i <= 4; i++) {
-    const dot = document.getElementById(`pd${i}`);
-    if (dot) dot.className = i === 1 ? 'pomo-dot' : 'pomo-dot empty';
-  }
-}
-
-function focusTask(title) {
-  document.getElementById('pomoTaskName').textContent = title;
-  resetPomo();
-  document.getElementById('pomoBar').scrollIntoView({ behavior: 'smooth' });
-}
+function focusTask(title){document.getElementById('pomoTaskName').textContent=title;resetPomo();document.getElementById('pomoBar').scrollIntoView({behavior:'smooth'});}
 </script>
 {% endblock %}

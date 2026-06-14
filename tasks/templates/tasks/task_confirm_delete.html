@@ -1,37 +1,33 @@
 {% extends 'tasks/base.html' %}
-{% block title %}Delete Task — Forge{% endblock %}
+{% block title %}Delete Task — FORGE{% endblock %}
 {% block content %}
-
-<div class="hero-strip" style="background:#fff1f2;padding:28px 32px;border-bottom:1px solid #e11d48">
-  <div class="hero-tag" style="color:#e11d48">Danger zone</div>
-  <div class="hero-title" style="font-size:2rem;color:#e11d48">Delete Task.</div>
-  <div class="hero-sub">This action cannot be undone.</div>
+<div class="hero-strip" style="background:rgba(253,89,89,0.08);border-bottom:1px solid rgba(253,89,89,0.2);padding:30px 40px">
+  <div class="hero-eyebrow" style="color:var(--watermelon);opacity:1">⚠ Danger zone</div>
+  <div class="hero-title" style="font-size:2.4rem;color:var(--watermelon)">Delete Task.</div>
+  <div class="hero-sub" style="color:rgba(253,89,89,0.7)">This action is permanent and cannot be undone.</div>
 </div>
-
-<div id="deleteWarning" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9998;display:flex;align-items:center;justify-content:center">
-  <div style="background:var(--card-bg);border:2px solid #e11d48;padding:36px;max-width:420px;width:90%;text-align:center">
-    <div style="font-size:2rem;margin-bottom:12px">⚠️</div>
-    <div style="font-size:1.1rem;font-weight:900;letter-spacing:-0.5px;margin-bottom:8px;color:var(--text)">Are you sure?</div>
-    <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:6px">You are about to permanently delete:</div>
-    <div style="font-weight:700;color:var(--text);padding:10px 16px;border:1px solid var(--border);margin-bottom:20px;font-size:0.9rem">{{ task.title }}</div>
-    <div style="font-size:0.78rem;color:#e11d48;margin-bottom:24px;font-weight:600">⚠ This cannot be undone. The task will be gone forever.</div>
-    <div style="display:flex;gap:10px;justify-content:center">
-      <button type="button" onclick="document.getElementById('deleteWarning').style.display='none'; document.getElementById('deleteForm').style.display='block'" class="btn btn-danger" style="border-radius:0">Yes, Delete Forever</button>
-      <a href="{% url 'dashboard' %}" class="btn btn-ghost" style="border-radius:0">Cancel</a>
+<div style="min-height:420px;background:rgba(26,26,46,0.65);display:flex;align-items:center;justify-content:center" id="deleteWarning">
+  <div style="background:var(--card-bg);border:1.5px solid rgba(253,89,89,0.35);padding:46px;max-width:460px;width:90%;text-align:center;border-radius:20px;box-shadow:var(--shadow-lg)">
+    <div style="font-size:3rem;margin-bottom:16px">⚠️</div>
+    <div style="font-size:1.2rem;font-weight:900;letter-spacing:-0.5px;margin-bottom:12px;color:var(--text)">Are you absolutely sure?</div>
+    <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:10px">You are about to permanently delete:</div>
+    <div style="font-weight:700;color:var(--text);padding:14px 20px;border:1px solid var(--border);border-radius:10px;margin-bottom:12px;background:var(--bg)">{{ task.title }}</div>
+    <div style="font-size:0.78rem;color:var(--watermelon);margin-bottom:28px;font-weight:600;padding:10px 14px;background:rgba(253,89,89,0.07);border-radius:8px">This cannot be undone. Gone forever.</div>
+    <div style="display:flex;gap:12px;justify-content:center">
+      <button type="button" onclick="document.getElementById('deleteWarning').style.display='none';document.getElementById('deleteForm').style.display='block'" class="btn btn-danger" style="border-radius:10px">Yes, Delete Forever</button>
+      <a href="{% url 'dashboard' %}" class="btn btn-ghost" style="border-radius:10px">Cancel</a>
     </div>
   </div>
 </div>
-
-<div id="deleteForm" style="display:none;padding:40px 32px">
-  <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:12px">Deleting:</div>
-  <div style="font-size:1.1rem;font-weight:700;padding:14px 18px;border:1px solid var(--border);margin-bottom:24px;color:var(--text)">{{ task.title }}</div>
+<div id="deleteForm" style="display:none;padding:40px">
+  <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Deleting:</div>
+  <div style="font-size:1.1rem;font-weight:700;padding:16px 20px;border:1px solid var(--border);border-radius:12px;margin-bottom:28px;color:var(--text);background:var(--card-bg)">{{ task.title }}</div>
   <form method="post">
     {% csrf_token %}
     <div style="display:flex;gap:12px">
-      <button type="submit" class="btn btn-danger" style="border-radius:0">Confirm Delete</button>
-      <a href="{% url 'dashboard' %}" class="btn btn-ghost" style="border-radius:0">Cancel</a>
+      <button type="submit" class="btn btn-danger" style="border-radius:10px">Confirm Delete</button>
+      <a href="{% url 'dashboard' %}" class="btn btn-ghost" style="border-radius:10px">Cancel</a>
     </div>
   </form>
 </div>
-
 {% endblock %}
