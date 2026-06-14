@@ -76,6 +76,7 @@
       <option value="deadline" {% if sort_by == 'deadline' %}selected{% endif %}>Deadline ↑</option>
       <option value="-deadline" {% if sort_by == '-deadline' %}selected{% endif %}>Deadline ↓</option>
       <option value="priority" {% if sort_by == 'priority' %}selected{% endif %}>Priority</option>
+      <option value="overdue" {% if sort_by == 'overdue' %}selected{% endif %}>Overdue First</option>
     </select>
     {% if query or status_filter or priority_filter %}
     <a href="{% url 'dashboard' %}" class="btn btn-ghost btn-sm">Clear</a>
