@@ -1,4 +1,4 @@
-from rest_framework.views import APIView
+from rest_framework.views import APIView 
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -63,12 +63,14 @@ class TaskListAPIView(APIView):
             'priority': 'priority', 'created_at': 'created_at', '-created_at': '-created_at',
         }
         tasks = tasks.order_by(sort_map.get(sort_by, '-created_at'))
+
         all_tasks = Task.objects.filter(user=request.user)
         total = all_tasks.count()
         completed_count = all_tasks.filter(status='completed').count()
         pending_count = all_tasks.filter(status='pending').count()
-        overdue = sum(1 for t in all_tasks.filter(status='pending') if t.is_overdue())
+        overdue = sum(1 for t in all_tasks.filter(status='pending') if t.is_overdue)
         completion_pct = round((completed_count / total * 100)) if total > 0 else 0
+
         serializer = TaskSerializer(tasks, many=True)
         return Response({
             'tasks': serializer.data,
@@ -136,8 +138,9 @@ class TaskStatsAPIView(APIView):
         total = all_tasks.count()
         completed = all_tasks.filter(status='completed').count()
         pending = all_tasks.filter(status='pending').count()
-        overdue = sum(1 for t in all_tasks.filter(status='pending') if t.is_overdue())
+        overdue = sum(1 for t in all_tasks.filter(status='pending') if t.is_overdue)
         completion_pct = round((completed / total * 100)) if total > 0 else 0
+
         return Response({
             'total': total,
             'completed': completed,
