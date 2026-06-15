@@ -58,19 +58,6 @@ Full **light / dark mode** with localStorage persistence.
 
 ---
 
-## Technology Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Backend | Python 3.13, Django 6.0 |
-| REST API | Django REST Framework 3.x |
-| Database | SQLite via Django ORM |
-| Frontend | Django Templates, Vanilla JS |
-| Typography | Inter (Google Fonts) |
-| Charts | Chart.js |
-| Version Control | Git + GitHub |
-
----
 
 ## Usage
 
