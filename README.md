@@ -95,6 +95,7 @@ python-project/
 │   │   ├── register.html
 │   │   ├── task_form.html
 │   │   └── task_confirm_delete.html
+|   |   └── 404.html
 │   ├── models.py          # Task model
 │   ├── views.py           # HTML views
 │   ├── forms.py           # Django forms
