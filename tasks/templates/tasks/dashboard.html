@@ -189,15 +189,23 @@ function toggleTask(btn) {
     const titleEl = document.getElementById(`title-${pk}`);
     const badge = document.getElementById(`sbadge-${pk}`);
     if (data.status === 'completed') {
-      btn.className = 'toggle-btn completed'; btn.textContent = '✓ Done';
-      card.classList.add('completed'); titleEl.style.textDecoration = 'line-through';
+      btn.className = 'toggle-btn completed';
+      btn.textContent = '✓ Done';
+      card.classList.add('completed');
+      titleEl.style.textDecoration = 'line-through';
       nCompleted++; nPending--;
       if (badge) { badge.className = 'status-badge sb-done'; badge.textContent = '✓ Done'; }
     } else {
-      btn.className = 'toggle-btn pending'; btn.textContent = 'Mark done →';
-      card.classList.remove('completed'); titleEl.style.textDecoration = '';
+      btn.className = 'toggle-btn pending';
+      btn.textContent = 'Mark done →';
+      card.classList.remove('completed');
+      titleEl.style.textDecoration = '';
       nCompleted--; nPending++;
-      if (badge) { badge.className = 'status-badge sb-pending'; badge.textContent = '● Pending'; }
+      if (card.classList.contains('overdue')) {
+        if (badge) { badge.className = 'status-badge sb-overdue'; badge.textContent = '⚠️ Overdue'; }
+      } else {
+        if (badge) { badge.className = 'status-badge sb-pending'; badge.textContent = '● Pending'; }
+      }
     }
     refreshStats();
   });
