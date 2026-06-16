@@ -171,13 +171,14 @@ const allTasks = [
   { title:"{{ task.title|escapejs }}", priority:"{{ task.priority }}", deadline:"{{ task.deadline|date:'Y-m-d' }}", status:"{{ task.status }}" },
   {% endfor %}
 ];
-let nTotal={{ total }}, nCompleted={{ completed }}, nPending={{ pending }};
+let nTotal={{ total }}, nCompleted={{ completed }}, nPending={{ pending }}, nOverdue={{ overdue }};
 
 function refreshStats() {
   const pct = nTotal > 0 ? Math.round(nCompleted/nTotal*100) : 0;
   document.getElementById('statTotal').textContent = nTotal;
   document.getElementById('statCompleted').textContent = nCompleted;
   document.getElementById('statPending').textContent = nPending;
+  document.getElementById('statOverdue').textContent = nOverdue;
   document.getElementById('mainProg').style.width = pct + '%';
 }
 
@@ -188,20 +189,25 @@ function toggleTask(btn) {
     const card = document.getElementById(`card-${pk}`);
     const titleEl = document.getElementById(`title-${pk}`);
     const badge = document.getElementById(`sbadge-${pk}`);
+    const isOverdue = card.classList.contains('overdue');
+
     if (data.status === 'completed') {
       btn.className = 'toggle-btn completed';
       btn.textContent = '✓ Done';
       card.classList.add('completed');
       titleEl.style.textDecoration = 'line-through';
       nCompleted++; nPending--;
+      if (isOverdue) { nOverdue--; }
       if (badge) { badge.className = 'status-badge sb-done'; badge.textContent = '✓ Done'; }
+
     } else {
       btn.className = 'toggle-btn pending';
       btn.textContent = 'Mark done →';
       card.classList.remove('completed');
       titleEl.style.textDecoration = '';
       nCompleted--; nPending++;
-      if (card.classList.contains('overdue')) {
+      if (isOverdue) {
+        nOverdue++;
         if (badge) { badge.className = 'status-badge sb-overdue'; badge.textContent = '⚠️ Overdue'; }
       } else {
         if (badge) { badge.className = 'status-badge sb-pending'; badge.textContent = '● Pending'; }
